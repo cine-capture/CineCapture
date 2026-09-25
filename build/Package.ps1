@@ -42,9 +42,9 @@ foreach ($name in 'README.md', 'LICENSE') {
     framework = '.NET Standard 2.1'
     components = [ordered]@{
         CameraOperator = (git -C "$RepositoryDirectory/CameraOperator" rev-parse HEAD)
-        FFmpegMediaWriter = (git -C "$RepositoryDirectory/FFmpegMediaWriter" rev-parse HEAD)
+        FFmpegMediaWriter = (git -C "$RepositoryDirectory/UnityRuntimeCameraRecorder/Dependencies/FFmpegMediaWriter" rev-parse HEAD)
         UnityRuntimeCameraRecorder = (git -C "$RepositoryDirectory/UnityRuntimeCameraRecorder" rev-parse HEAD)
-        Direct3DVideoEncoder = (git -C "$RepositoryDirectory/Direct3DVideoEncoder" rev-parse HEAD)
+        Direct3DVideoEncoder = (git -C "$RepositoryDirectory/UnityRuntimeCameraRecorder/Dependencies/Direct3DVideoEncoder" rev-parse HEAD)
     }
     fileSha256 = $hashes
 } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath "$PackageDirectory/build-info.json" -Encoding utf8

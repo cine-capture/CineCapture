@@ -1,12 +1,6 @@
 [submodule "CameraOperator"]
 	path = CameraOperator
 	url = https://github.com/cine-capture/CameraOperator.git
-[submodule "FFmpegMediaWriter"]
-	path = FFmpegMediaWriter
-	url = https://github.com/cine-capture/FFmpegMediaWriter.git
 [submodule "UnityRuntimeCameraRecorder"]
 	path = UnityRuntimeCameraRecorder
 	url = https://github.com/cine-capture/UnityRuntimeCameraRecorder.git
-[submodule "Direct3DVideoEncoder"]
-	path = Direct3DVideoEncoder
-	url = https://github.com/cine-capture/Direct3DVideoEncoder.git

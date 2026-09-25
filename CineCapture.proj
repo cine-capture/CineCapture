@@ -11,9 +11,9 @@
     <ILRepackExecutable>$(ILRepackDirectory)\tools\ILRepack.exe</ILRepackExecutable>
     <PackageScript>$(MSBuildThisFileDirectory)build\Package.ps1</PackageScript>
     <CameraOperatorProject>$(SourceDirectory)\CameraOperator\CameraOperator.csproj</CameraOperatorProject>
-    <MediaWriterProject>$(SourceDirectory)\FFmpegMediaWriter\FFmpegMediaWriter.csproj</MediaWriterProject>
+    <MediaWriterProject>$(SourceDirectory)\UnityRuntimeCameraRecorder\Dependencies\FFmpegMediaWriter\FFmpegMediaWriter.csproj</MediaWriterProject>
     <RecorderProject>$(SourceDirectory)\UnityRuntimeCameraRecorder\UnityRuntimeCameraRecorder.csproj</RecorderProject>
-    <VideoEncoderProject>$(SourceDirectory)\Direct3DVideoEncoder\Direct3DVideoEncoder.vcxproj</VideoEncoderProject>
+    <VideoEncoderProject>$(SourceDirectory)\UnityRuntimeCameraRecorder\Dependencies\Direct3DVideoEncoder\Direct3DVideoEncoder.vcxproj</VideoEncoderProject>
     <MetadataProject>$(MSBuildThisFileDirectory)CineCapture.Metadata.csproj</MetadataProject>
   </PropertyGroup>
 
@@ -23,9 +23,9 @@
     <Error Condition="'$(NativeMSBuildPath)' == '' Or !Exists('$(NativeMSBuildPath)')"
            Text="Supply NativeMSBuildPath pointing to Visual Studio MSBuild.exe." />
     <Error Condition="!Exists('$(CameraOperatorProject)')" Text="Initialize the CameraOperator submodule." />
-    <Error Condition="!Exists('$(MediaWriterProject)')" Text="Initialize the FFmpegMediaWriter submodule." />
+    <Error Condition="!Exists('$(MediaWriterProject)')" Text="Initialize the UnityRuntimeCameraRecorder submodules recursively." />
     <Error Condition="!Exists('$(RecorderProject)')" Text="Initialize the UnityRuntimeCameraRecorder submodule." />
-    <Error Condition="!Exists('$(VideoEncoderProject)')" Text="Initialize the Direct3DVideoEncoder submodule." />
+    <Error Condition="!Exists('$(VideoEncoderProject)')" Text="Initialize the UnityRuntimeCameraRecorder submodules recursively." />
     <Error Condition="!Exists('$(MetadataProject)')" Text="The CineCapture metadata project is missing." />
     <Error Condition="'$(UnityVersion)' == ''" Text="Supply the UnityVersion release metadata property." />
     <Error Condition="!Exists('$(PackageScript)')" Text="The release packaging script is missing." />
@@ -53,12 +53,12 @@
           Command="nuget install ILRepack -Version $(ILRepackVersion) -OutputDirectory &quot;$(ArtifactsDirectory)\tools&quot; -ExcludeVersion -NonInteractive"
           WorkingDirectory="$(MSBuildThisFileDirectory)" />
     <Exec WorkingDirectory="$(MSBuildThisFileDirectory)"
-          Command="&quot;$(ILRepackExecutable)&quot; /ndebug &quot;/lib:$(UnityManagedPath)&quot; /out:&quot;$(PackageDirectory)\CineCapture.dll&quot; &quot;$(MSBuildThisFileDirectory)bin\$(Configuration)\netstandard2.1\CineCapture.dll&quot; &quot;$(SourceDirectory)\UnityRuntimeCameraRecorder\bin\$(Configuration)\netstandard2.1\UnityRuntimeCameraRecorder.dll&quot; &quot;$(SourceDirectory)\FFmpegMediaWriter\bin\$(Configuration)\netstandard2.0\FFmpegMediaWriter.dll&quot; &quot;$(SourceDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\CameraOperator.dll&quot; &quot;$(SourceDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\YamlDotNet.dll&quot;" />
+          Command="&quot;$(ILRepackExecutable)&quot; /ndebug &quot;/lib:$(UnityManagedPath)&quot; /out:&quot;$(PackageDirectory)\CineCapture.dll&quot; &quot;$(MSBuildThisFileDirectory)bin\$(Configuration)\netstandard2.1\CineCapture.dll&quot; &quot;$(SourceDirectory)\UnityRuntimeCameraRecorder\bin\$(Configuration)\netstandard2.1\UnityRuntimeCameraRecorder.dll&quot; &quot;$(SourceDirectory)\UnityRuntimeCameraRecorder\Dependencies\FFmpegMediaWriter\bin\$(Configuration)\netstandard2.0\FFmpegMediaWriter.dll&quot; &quot;$(SourceDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\CameraOperator.dll&quot; &quot;$(SourceDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\YamlDotNet.dll&quot;" />
   </Target>
 
   <Target Name="PreparePackage" DependsOnTargets="BuildNative;MergeManaged">
     <ItemGroup>
-      <PackageFile Include="$(SourceDirectory)\Direct3DVideoEncoder\build\$(Platform)\$(Configuration)\Direct3DVideoEncoder.dll" />
+      <PackageFile Include="$(SourceDirectory)\UnityRuntimeCameraRecorder\Dependencies\Direct3DVideoEncoder\build\$(Platform)\$(Configuration)\Direct3DVideoEncoder.dll" />
       <PackageFile Include="$(MSBuildThisFileDirectory)LICENSE" />
       <PackageFile Include="$(MSBuildThisFileDirectory)README.md" />
     </ItemGroup>

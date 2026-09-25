@@ -54,7 +54,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             throw 'One or more release component submodules are unavailable.'
           }
-          foreach ($project in 'CameraOperator/CameraOperator.csproj', 'FFmpegMediaWriter/FFmpegMediaWriter.csproj', 'UnityRuntimeCameraRecorder/UnityRuntimeCameraRecorder.csproj', 'Direct3DVideoEncoder/Direct3DVideoEncoder.vcxproj') {
+          foreach ($project in 'CameraOperator/CameraOperator.csproj', 'UnityRuntimeCameraRecorder/UnityRuntimeCameraRecorder.csproj', 'UnityRuntimeCameraRecorder/Dependencies/FFmpegMediaWriter/FFmpegMediaWriter.csproj', 'UnityRuntimeCameraRecorder/Dependencies/Direct3DVideoEncoder/Direct3DVideoEncoder.vcxproj') {
             if (-not (Test-Path -LiteralPath $project)) {
               throw "Submodule content is missing: $project"
             }
