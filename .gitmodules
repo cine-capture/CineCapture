@@ -1,0 +1,12 @@
+[submodule "components/CameraOperator"]
+	path = components/CameraOperator
+	url = https://github.com/cine-capture/CameraOperator.git
+[submodule "components/FFmpegMediaWriter"]
+	path = components/FFmpegMediaWriter
+	url = https://github.com/cine-capture/FFmpegMediaWriter.git
+[submodule "components/UnityRuntimeCameraRecorder"]
+	path = components/UnityRuntimeCameraRecorder
+	url = https://github.com/cine-capture/UnityRuntimeCameraRecorder.git
+[submodule "components/Direct3DVideoEncoder"]
+	path = components/Direct3DVideoEncoder
+	url = https://github.com/cine-capture/Direct3DVideoEncoder.git
