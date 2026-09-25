@@ -13,7 +13,6 @@
     <CameraOperatorProject>$(SourceDirectory)\CameraOperator\CameraOperator.csproj</CameraOperatorProject>
     <MediaWriterProject>$(SourceDirectory)\UnityRuntimeCameraRecorder\Dependencies\FFmpegMediaWriter\FFmpegMediaWriter.csproj</MediaWriterProject>
     <RecorderProject>$(SourceDirectory)\UnityRuntimeCameraRecorder\UnityRuntimeCameraRecorder.csproj</RecorderProject>
-    <VideoEncoderProject>$(SourceDirectory)\UnityRuntimeCameraRecorder\Dependencies\Direct3DVideoEncoder\Direct3DVideoEncoder.vcxproj</VideoEncoderProject>
     <MetadataProject>$(MSBuildThisFileDirectory)CineCapture.Metadata.csproj</MetadataProject>
   </PropertyGroup>
 
@@ -25,7 +24,6 @@
     <Error Condition="!Exists('$(CameraOperatorProject)')" Text="Initialize the CameraOperator submodule." />
     <Error Condition="!Exists('$(MediaWriterProject)')" Text="Initialize the UnityRuntimeCameraRecorder submodules recursively." />
     <Error Condition="!Exists('$(RecorderProject)')" Text="Initialize the UnityRuntimeCameraRecorder submodule." />
-    <Error Condition="!Exists('$(VideoEncoderProject)')" Text="Initialize the UnityRuntimeCameraRecorder submodules recursively." />
     <Error Condition="!Exists('$(MetadataProject)')" Text="The CineCapture metadata project is missing." />
     <Error Condition="'$(UnityVersion)' == ''" Text="Supply the UnityVersion release metadata property." />
     <Error Condition="!Exists('$(PackageScript)')" Text="The release packaging script is missing." />
@@ -36,16 +34,12 @@
     <MakeDir Directories="$(PackageDirectory)" />
   </Target>
 
-  <Target Name="BuildNative" DependsOnTargets="Prepare">
-    <Exec Command="&quot;$(NativeMSBuildPath)&quot; &quot;$(VideoEncoderProject)&quot; /m /t:Build /p:Configuration=$(Configuration) /p:Platform=$(Platform) /v:minimal" />
-  </Target>
-
   <Target Name="BuildManaged" DependsOnTargets="Prepare">
     <Exec Command="dotnet build &quot;$(MetadataProject)&quot; -c $(Configuration) -v minimal" />
     <Exec Command="dotnet restore &quot;$(CameraOperatorProject)&quot; -p:TargetFramework=$(ManagedFramework) -p:TargetFrameworks=$(ManagedFramework) -p:UnityManagedPath=&quot;$(UnityManagedPath)&quot;" />
     <Exec Command="dotnet build &quot;$(CameraOperatorProject)&quot; --no-restore -c $(Configuration) -f $(ManagedFramework) -p:TargetFramework=$(ManagedFramework) -p:TargetFrameworks=$(ManagedFramework) -p:UnityManagedPath=&quot;$(UnityManagedPath)&quot; -p:CopyLocalLockFileAssemblies=true -v minimal" />
     <Exec Command="dotnet build &quot;$(MediaWriterProject)&quot; -c $(Configuration) -v minimal" />
-    <Exec Command="dotnet build &quot;$(RecorderProject)&quot; -c $(Configuration) -p:UnityManagedPath=&quot;$(UnityManagedPath)&quot; -v minimal" />
+    <Exec Command="dotnet build &quot;$(RecorderProject)&quot; -c $(Configuration) -p:UnityManagedPath=&quot;$(UnityManagedPath)&quot; -p:NativeMSBuildPath=&quot;$(NativeMSBuildPath)&quot; -v minimal" />
   </Target>
 
   <Target Name="MergeManaged" DependsOnTargets="BuildManaged">
@@ -56,7 +50,7 @@
           Command="&quot;$(ILRepackExecutable)&quot; /ndebug &quot;/lib:$(UnityManagedPath)&quot; /out:&quot;$(PackageDirectory)\CineCapture.dll&quot; &quot;$(MSBuildThisFileDirectory)bin\$(Configuration)\netstandard2.1\CineCapture.dll&quot; &quot;$(SourceDirectory)\UnityRuntimeCameraRecorder\bin\$(Configuration)\netstandard2.1\UnityRuntimeCameraRecorder.dll&quot; &quot;$(SourceDirectory)\UnityRuntimeCameraRecorder\Dependencies\FFmpegMediaWriter\bin\$(Configuration)\netstandard2.0\FFmpegMediaWriter.dll&quot; &quot;$(SourceDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\CameraOperator.dll&quot; &quot;$(SourceDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\YamlDotNet.dll&quot;" />
   </Target>
 
-  <Target Name="PreparePackage" DependsOnTargets="BuildNative;MergeManaged">
+  <Target Name="PreparePackage" DependsOnTargets="MergeManaged">
     <ItemGroup>
       <PackageFile Include="$(SourceDirectory)\UnityRuntimeCameraRecorder\Dependencies\Direct3DVideoEncoder\build\$(Platform)\$(Configuration)\Direct3DVideoEncoder.dll" />
       <PackageFile Include="$(MSBuildThisFileDirectory)LICENSE" />
