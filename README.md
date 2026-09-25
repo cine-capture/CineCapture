@@ -13,7 +13,9 @@ Component source repositories:
 ## Example of use
 
 [SagaCapture](https://thunderstore.io/c/valheim/p/Landoria/SagaCapture/) is a
-Valheim mod that uses CineCapture to create cinematic gameplay recordings.
+[Valheim](https://www.valheimgame.com/) mod available on
+[Thunderstore](https://thunderstore.io/c/valheim/) that uses CineCapture to
+create cinematic gameplay recordings.
 
 Watch the [SagaCapture video](https://youtu.be/_2L1In2dieM) to see it in action.
 
