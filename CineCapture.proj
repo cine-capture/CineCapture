@@ -41,22 +41,11 @@
   </Target>
 
   <Target Name="BuildManaged" DependsOnTargets="Prepare">
-    <MSBuild Projects="$(MetadataProject)"
-             Targets="Restore;Build"
-             Properties="Configuration=$(Configuration)"
-             RemoveProperties="Platform" />
-    <MSBuild Projects="$(CameraOperatorProject)"
-             Targets="Restore;Build"
-             Properties="Configuration=$(Configuration);TargetFramework=$(ManagedFramework);UnityManagedPath=$(UnityManagedPath);CopyLocalLockFileAssemblies=true"
-             RemoveProperties="Platform" />
-    <MSBuild Projects="$(MediaWriterProject)"
-             Targets="Restore;Build"
-             Properties="Configuration=$(Configuration)"
-             RemoveProperties="Platform" />
-    <MSBuild Projects="$(RecorderProject)"
-             Targets="Restore;Build"
-             Properties="Configuration=$(Configuration);UnityManagedPath=$(UnityManagedPath)"
-             RemoveProperties="Platform" />
+    <Exec Command="dotnet build &quot;$(MetadataProject)&quot; -c $(Configuration) -v minimal" />
+    <Exec Command="dotnet restore &quot;$(CameraOperatorProject)&quot; -p:TargetFramework=$(ManagedFramework) -p:TargetFrameworks=$(ManagedFramework) -p:UnityManagedPath=&quot;$(UnityManagedPath)&quot;" />
+    <Exec Command="dotnet build &quot;$(CameraOperatorProject)&quot; --no-restore -c $(Configuration) -f $(ManagedFramework) -p:TargetFramework=$(ManagedFramework) -p:TargetFrameworks=$(ManagedFramework) -p:UnityManagedPath=&quot;$(UnityManagedPath)&quot; -p:CopyLocalLockFileAssemblies=true -v minimal" />
+    <Exec Command="dotnet build &quot;$(MediaWriterProject)&quot; -c $(Configuration) -v minimal" />
+    <Exec Command="dotnet build &quot;$(RecorderProject)&quot; -c $(Configuration) -p:UnityManagedPath=&quot;$(UnityManagedPath)&quot; -v minimal" />
   </Target>
 
   <Target Name="MergeManaged" DependsOnTargets="BuildManaged">
