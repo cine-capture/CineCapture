@@ -55,7 +55,7 @@ jobs:
             throw 'One or more release component submodules are unavailable.'
           }
           foreach ($project in 'CameraOperator/CameraOperator.csproj', 'FFmpegMediaWriter/FFmpegMediaWriter.csproj', 'UnityRuntimeCameraRecorder/UnityRuntimeCameraRecorder.csproj', 'Direct3DVideoEncoder/Direct3DVideoEncoder.vcxproj') {
-            if (-not (Test-Path -LiteralPath "components/$project")) {
+            if (-not (Test-Path -LiteralPath $project)) {
               throw "Submodule content is missing: $project"
             }
           }
@@ -86,7 +86,8 @@ jobs:
           $editorDirectory = Split-Path -Parent $env:UNITY_EXECUTABLE
           $managed = Join-Path $editorDirectory 'Data/Managed/UnityEngine'
           New-Item -ItemType Directory -Path artifacts/logs -Force | Out-Null
-          & ($msbuild | Select-Object -First 1) CineCapture.proj /m /t:Package /p:Configuration=Release "/p:UnityManagedPath=$managed" "/p:UnityVersion=$env:UNITY_VERSION" /v:minimal /fl '/flp:logfile=artifacts/logs/release-build.log;verbosity=normal'
+          $nativeMsbuild = $msbuild | Select-Object -First 1
+          dotnet msbuild CineCapture.proj /m /t:Package /p:Configuration=Release "/p:UnityManagedPath=$managed" "/p:UnityVersion=$env:UNITY_VERSION" "/p:NativeMSBuildPath=$nativeMsbuild" /v:minimal /fl '/flp:logfile=artifacts/logs/release-build.log;verbosity=normal'
           if ($LASTEXITCODE -ne 0) {
             throw "Release packaging failed with exit code $LASTEXITCODE."
           }

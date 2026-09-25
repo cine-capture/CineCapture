@@ -1,4 +1,4 @@
-# CineCapture
+# CineCapture for Unity
 
 This repository builds the unified CineCapture release. It does not contain the
 component source code.
@@ -9,6 +9,15 @@ Component source repositories:
 - [FFmpegMediaWriter](https://github.com/cine-capture/FFmpegMediaWriter)
 - [UnityRuntimeCameraRecorder](https://github.com/cine-capture/UnityRuntimeCameraRecorder)
 - [Direct3DVideoEncoder](https://github.com/cine-capture/Direct3DVideoEncoder)
+
+## Example of use
+
+[SagaCapture](https://thunderstore.io/c/valheim/p/Landoria/SagaCapture/) is a
+Valheim mod that uses CineCapture to create cinematic gameplay recordings.
+
+Watch the [SagaCapture video](https://youtu.be/_2L1In2dieM) to see it in action.
+
+## Archive contents
 
 The release archive contains:
 

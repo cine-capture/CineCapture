@@ -3,23 +3,25 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <Platform>x64</Platform>
     <ManagedFramework>netstandard2.1</ManagedFramework>
-    <ComponentsDirectory>$(MSBuildThisFileDirectory)components</ComponentsDirectory>
+    <SourceDirectory>$(MSBuildProjectDirectory)</SourceDirectory>
     <ArtifactsDirectory>$(MSBuildThisFileDirectory)artifacts</ArtifactsDirectory>
     <PackageDirectory>$(ArtifactsDirectory)\package</PackageDirectory>
     <ILRepackVersion>2.0.48</ILRepackVersion>
     <ILRepackDirectory>$(ArtifactsDirectory)\tools\ILRepack</ILRepackDirectory>
     <ILRepackExecutable>$(ILRepackDirectory)\tools\ILRepack.exe</ILRepackExecutable>
     <PackageScript>$(MSBuildThisFileDirectory)build\Package.ps1</PackageScript>
-    <CameraOperatorProject>$(ComponentsDirectory)\CameraOperator\CameraOperator.csproj</CameraOperatorProject>
-    <MediaWriterProject>$(ComponentsDirectory)\FFmpegMediaWriter\FFmpegMediaWriter.csproj</MediaWriterProject>
-    <RecorderProject>$(ComponentsDirectory)\UnityRuntimeCameraRecorder\UnityRuntimeCameraRecorder.csproj</RecorderProject>
-    <VideoEncoderProject>$(ComponentsDirectory)\Direct3DVideoEncoder\Direct3DVideoEncoder.vcxproj</VideoEncoderProject>
+    <CameraOperatorProject>$(SourceDirectory)\CameraOperator\CameraOperator.csproj</CameraOperatorProject>
+    <MediaWriterProject>$(SourceDirectory)\FFmpegMediaWriter\FFmpegMediaWriter.csproj</MediaWriterProject>
+    <RecorderProject>$(SourceDirectory)\UnityRuntimeCameraRecorder\UnityRuntimeCameraRecorder.csproj</RecorderProject>
+    <VideoEncoderProject>$(SourceDirectory)\Direct3DVideoEncoder\Direct3DVideoEncoder.vcxproj</VideoEncoderProject>
     <MetadataProject>$(MSBuildThisFileDirectory)CineCapture.Metadata.csproj</MetadataProject>
   </PropertyGroup>
 
   <Target Name="ValidateInputs">
     <Error Condition="'$(UnityManagedPath)' == '' Or !Exists('$(UnityManagedPath)\UnityEngine.CoreModule.dll')"
            Text="Supply UnityManagedPath pointing to Unity's managed UnityEngine assembly directory." />
+    <Error Condition="'$(NativeMSBuildPath)' == '' Or !Exists('$(NativeMSBuildPath)')"
+           Text="Supply NativeMSBuildPath pointing to Visual Studio MSBuild.exe." />
     <Error Condition="!Exists('$(CameraOperatorProject)')" Text="Initialize the CameraOperator submodule." />
     <Error Condition="!Exists('$(MediaWriterProject)')" Text="Initialize the FFmpegMediaWriter submodule." />
     <Error Condition="!Exists('$(RecorderProject)')" Text="Initialize the UnityRuntimeCameraRecorder submodule." />
@@ -35,9 +37,7 @@
   </Target>
 
   <Target Name="BuildNative" DependsOnTargets="Prepare">
-    <MSBuild Projects="$(VideoEncoderProject)"
-             Targets="Build"
-             Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+    <Exec Command="&quot;$(NativeMSBuildPath)&quot; &quot;$(VideoEncoderProject)&quot; /m /t:Build /p:Configuration=$(Configuration) /p:Platform=$(Platform) /v:minimal" />
   </Target>
 
   <Target Name="BuildManaged" DependsOnTargets="Prepare">
@@ -47,7 +47,7 @@
              RemoveProperties="Platform" />
     <MSBuild Projects="$(CameraOperatorProject)"
              Targets="Restore;Build"
-             Properties="Configuration=$(Configuration);TargetFramework=$(ManagedFramework);UnityManagedPath=$(UnityManagedPath)"
+             Properties="Configuration=$(Configuration);TargetFramework=$(ManagedFramework);UnityManagedPath=$(UnityManagedPath);CopyLocalLockFileAssemblies=true"
              RemoveProperties="Platform" />
     <MSBuild Projects="$(MediaWriterProject)"
              Targets="Restore;Build"
@@ -64,12 +64,12 @@
           Command="nuget install ILRepack -Version $(ILRepackVersion) -OutputDirectory &quot;$(ArtifactsDirectory)\tools&quot; -ExcludeVersion -NonInteractive"
           WorkingDirectory="$(MSBuildThisFileDirectory)" />
     <Exec WorkingDirectory="$(MSBuildThisFileDirectory)"
-          Command="&quot;$(ILRepackExecutable)&quot; &quot;/lib:$(UnityManagedPath)&quot; /out:&quot;$(PackageDirectory)\CineCapture.dll&quot; &quot;$(MSBuildThisFileDirectory)bin\$(Configuration)\netstandard2.1\CineCapture.dll&quot; &quot;$(ComponentsDirectory)\UnityRuntimeCameraRecorder\bin\$(Configuration)\netstandard2.1\UnityRuntimeCameraRecorder.dll&quot; &quot;$(ComponentsDirectory)\FFmpegMediaWriter\bin\$(Configuration)\netstandard2.0\FFmpegMediaWriter.dll&quot; &quot;$(ComponentsDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\CameraOperator.dll&quot; &quot;$(ComponentsDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\YamlDotNet.dll&quot;" />
+          Command="&quot;$(ILRepackExecutable)&quot; /ndebug &quot;/lib:$(UnityManagedPath)&quot; /out:&quot;$(PackageDirectory)\CineCapture.dll&quot; &quot;$(MSBuildThisFileDirectory)bin\$(Configuration)\netstandard2.1\CineCapture.dll&quot; &quot;$(SourceDirectory)\UnityRuntimeCameraRecorder\bin\$(Configuration)\netstandard2.1\UnityRuntimeCameraRecorder.dll&quot; &quot;$(SourceDirectory)\FFmpegMediaWriter\bin\$(Configuration)\netstandard2.0\FFmpegMediaWriter.dll&quot; &quot;$(SourceDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\CameraOperator.dll&quot; &quot;$(SourceDirectory)\CameraOperator\bin\$(Configuration)\$(ManagedFramework)\YamlDotNet.dll&quot;" />
   </Target>
 
   <Target Name="PreparePackage" DependsOnTargets="BuildNative;MergeManaged">
     <ItemGroup>
-      <PackageFile Include="$(ComponentsDirectory)\Direct3DVideoEncoder\build\$(Platform)\$(Configuration)\Direct3DVideoEncoder.dll" />
+      <PackageFile Include="$(SourceDirectory)\Direct3DVideoEncoder\build\$(Platform)\$(Configuration)\Direct3DVideoEncoder.dll" />
       <PackageFile Include="$(MSBuildThisFileDirectory)LICENSE" />
       <PackageFile Include="$(MSBuildThisFileDirectory)README.md" />
     </ItemGroup>
@@ -79,6 +79,6 @@
   <Target Name="BuildRelease" DependsOnTargets="PreparePackage" />
 
   <Target Name="Package" DependsOnTargets="BuildRelease">
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(PackageScript)&quot; -RepositoryDirectory &quot;$(MSBuildThisFileDirectory)&quot; -PackageDirectory &quot;$(PackageDirectory)&quot; -ArtifactsDirectory &quot;$(ArtifactsDirectory)&quot; -UnityVersion &quot;$(UnityVersion)&quot;" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(PackageScript)&quot; -RepositoryDirectory &quot;$(MSBuildProjectDirectory)&quot; -PackageDirectory &quot;$(PackageDirectory)&quot; -ArtifactsDirectory &quot;$(ArtifactsDirectory)&quot; -UnityVersion &quot;$(UnityVersion)&quot;" />
   </Target>
 </Project>
