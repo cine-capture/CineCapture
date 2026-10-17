@@ -26,7 +26,14 @@ foreach ($name in 'CineCapture.dll', 'Direct3DVideoEncoder.dll') {
     if ($file.Length -eq 0) {
         throw "The packaged $name is empty."
     }
-    $hashes[$name] = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $hash = $sha256.ComputeHash([System.IO.File]::ReadAllBytes($file.FullName))
+        $hashes[$name] = [System.BitConverter]::ToString($hash).Replace('-', '')
+    }
+    finally {
+        $sha256.Dispose()
+    }
 }
 foreach ($name in 'README.md', 'LICENSE') {
     if (-not (Test-Path -LiteralPath "$PackageDirectory/$name" -PathType Leaf)) {
